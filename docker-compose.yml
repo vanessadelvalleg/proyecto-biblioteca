@@ -1,0 +1,66 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: .docker/app/Dockerfile
+      args:
+        PHP_VERSION: "8.3"
+    container_name: biblioteca_app
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - mysql
+      - redis
+
+  web:
+    image: nginx:1.27-alpine
+    container_name: biblioteca_web
+    ports:
+      - "5173:5173"
+      - "8080:80" 
+    volumes:
+      - ./:/var/www/html
+      - ./.docker/web/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+
+  mysql:
+    image: mysql:8.0
+    container_name: biblioteca_mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: biblioteca
+      MYSQL_USER: ubiblioteca
+      MYSQL_PASSWORD: pbiblioteca
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_mysql:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: biblioteca_phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "8082:80"
+    depends_on:
+      - mysql
+
+  redis:
+    image: redis:7-alpine
+    container_name: biblioteca_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  db_mysql:
+  redis_data:
