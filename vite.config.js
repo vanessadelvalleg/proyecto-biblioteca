@@ -8,7 +8,7 @@ export default defineConfig({
     strictPort: true,
     hmr: {
       host: 'host.docker.internal',
-      protocol: 'ws',
+      protocol: 'ws', 
     },
-  },
+  }, 
 });
